@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kpi
+      POSTGRES_PASSWORD: kpi
+      POSTGRES_DB: kpi
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kpi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://kpi:kpi@db:5432/kpi
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: http://localhost:5173
+      JWT_SECRET: dev-secret-change-me
+      # ANTHROPIC_API_KEY: set this to enable the optional live narrative
+    depends_on:
+      db: {condition: service_healthy}
+    ports: ["8000:8000"]
+    command: >
+      sh -c "python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    depends_on: [backend]
+    ports: ["5173:5173"]
+
+volumes:
+  pgdata:

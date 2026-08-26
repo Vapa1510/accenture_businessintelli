@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.db
+.venv/
+venv/
+node_modules/
+dist/
+.env
+.pytest_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# test artifacts
+test_output*.txt
+test_api.db
+
+# build
+*.log
