@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import os
 import time
+from datetime import date, timedelta
 from functools import lru_cache
 
 from contextlib import asynccontextmanager
@@ -29,15 +30,15 @@ from sqlalchemy.orm import Session
 from . import cache
 from .auth import (ROLES, authenticate, can_approve, create_token, current_role,
                    redact_for_role)
-from .db import Feedback, InsightLog, get_db, init_db
+from .db import External, Feedback, InsightLog, Marketing, Transaction, get_db, init_db
 from .engine.analytics import (anomaly_days, correlations, dim_contribution,
                                kpi_agg, to_frames)
-from .engine.generator import SCENARIOS, generate
+from .engine.generator import DAYS, SCENARIOS, TODAY, date_of, generate, generate_day
 from .engine.insight import compute_insight
 from .engine.narrative import (allowed_numbers, narrate, narrate_live,
                                validate_narrative)
 from .engine.semantic import KPI_META, window_idx
-from .schemas import (ChatIn, ChatOut, FeedbackIn, InsightResponse,
+from .schemas import (ChatIn, ChatOut, FeedbackIn, InsightResponse, SimulateIn,
                       TokenResponse)
 
 @asynccontextmanager
@@ -309,3 +310,86 @@ def health(db: Session = Depends(get_db)):
                     "cache_hit": r.cache_hit, "provider": r.provider,
                     "abstained": r.abstained, "confidence": r.confidence} for r in rows[:12]],
     }
+
+
+# --------------------------------------------------------------------------
+@app.get("/api/scenarios/{scenario}/dates")
+def scenario_dates(scenario: str, db: Session = Depends(get_db)):
+    if scenario not in SCENARIOS:
+        raise HTTPException(status_code=404, detail=f"Unknown scenario '{scenario}'")
+    min_date = db.query(func.min(Transaction.date)).filter(Transaction.scenario == scenario).scalar()
+    max_date = db.query(func.max(Transaction.date)).filter(Transaction.scenario == scenario).scalar()
+    tx_count = db.query(func.count(Transaction.id)).filter(Transaction.scenario == scenario).scalar() or 0
+    mk_count = db.query(func.count(Marketing.id)).filter(Marketing.scenario == scenario).scalar() or 0
+    ex_count = db.query(func.count(External.id)).filter(External.scenario == scenario).scalar() or 0
+
+    epoch = TODAY - timedelta(days=DAYS - 1)
+    max_day_i = (max_date - epoch).days if max_date else DAYS - 1
+
+    return {
+        "scenario": scenario,
+        "min_date": str(min_date) if min_date else None,
+        "max_date": str(max_date) if max_date else None,
+        "days_span": (max_date - min_date).days + 1 if (max_date and min_date) else DAYS,
+        "max_day_index": max_day_i,
+        "simulated_days": max(0, max_day_i - (DAYS - 1)),
+        "tx_rows": tx_count,
+        "mk_rows": mk_count,
+        "ex_rows": ex_count,
+    }
+
+
+@app.post("/api/scenarios/{scenario}/simulate-day")
+def simulate_day(scenario: str, body: SimulateIn, db: Session = Depends(get_db)):
+    if scenario not in SCENARIOS:
+        raise HTTPException(status_code=404, detail=f"Unknown scenario '{scenario}'")
+    max_date = db.query(func.max(Transaction.date)).filter(Transaction.scenario == scenario).scalar()
+    epoch = TODAY - timedelta(days=DAYS - 1)
+    current_max_i = (max_date - epoch).days if max_date else DAYS - 1
+    next_i = current_max_i + 1
+    next_date = date_of(next_i)
+
+    tx_list, mk_list, ex_list = generate_day(
+        scenario, next_i,
+        marketing_mult=body.marketing_multiplier,
+        stockout_override=body.stockout_rate,
+        competitor_price_override=body.competitor_price_index,
+    )
+
+    db.bulk_save_objects([Transaction(scenario=scenario, **{**r, "date": date.fromisoformat(r["date"])}) for r in tx_list])
+    db.bulk_save_objects([Marketing(scenario=scenario, **{**r, "date": date.fromisoformat(r["date"])}) for r in mk_list])
+    db.bulk_save_objects([External(scenario=scenario, **{**r, "date": date.fromisoformat(r["date"])}) for r in ex_list])
+    db.commit()
+
+    cache.clear()
+
+    return {
+        "status": "simulated",
+        "scenario": scenario,
+        "day_index": next_i,
+        "date": str(next_date),
+        "added_tx": len(tx_list),
+        "added_mk": len(mk_list),
+        "added_ex": len(ex_list),
+    }
+
+
+@app.post("/api/scenarios/{scenario}/reset")
+def reset_scenario(scenario: str, db: Session = Depends(get_db)):
+    if scenario not in SCENARIOS:
+        raise HTTPException(status_code=404, detail=f"Unknown scenario '{scenario}'")
+    db.query(Transaction).filter(Transaction.scenario == scenario).delete()
+    db.query(Marketing).filter(Marketing.scenario == scenario).delete()
+    db.query(External).filter(External.scenario == scenario).delete()
+    db.commit()
+
+    ds = generate(scenario)
+    db.bulk_save_objects([Transaction(scenario=scenario, **{**r, "date": date.fromisoformat(r["date"])}) for r in ds.transactions])
+    db.bulk_save_objects([Marketing(scenario=scenario, **{**r, "date": date.fromisoformat(r["date"])}) for r in ds.marketing])
+    db.bulk_save_objects([External(scenario=scenario, **{**r, "date": date.fromisoformat(r["date"])}) for r in ds.external])
+    db.commit()
+
+    cache.clear()
+
+    return {"status": "reset", "scenario": scenario}
+

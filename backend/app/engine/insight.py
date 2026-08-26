@@ -30,14 +30,14 @@ def _signpct(x: float) -> str:
     return f"{'+' if x >= 0 else ''}{x * 100:.1f}%"
 
 
-def period_str() -> str:
-    w = window_idx()
+def period_str(db: Session | None = None, scenario: str | None = None) -> str:
+    w = window_idx(db, scenario)
     return f"{iso(date_of(w['cur_start']))} -> {iso(date_of(w['cur_end']))}"
 
 
 def build_evidence(ds: Dataset, F, ins: dict, db: Session | None = None, scenario: str | None = None) -> list[dict]:
     """Each evidence object binds a claim to its source, method and result."""
-    w = window_idx()
+    w = window_idx(db, scenario)
     flt = ins["filter"]
     cur = kpi_agg(F, w["cur_start"], w["cur_end"], flt, db=db, scenario=scenario)
     prev = kpi_agg(F, w["prev_start"], w["prev_end"], flt, db=db, scenario=scenario)
@@ -50,7 +50,7 @@ def build_evidence(ds: Dataset, F, ins: dict, db: Session | None = None, scenari
     top_region = ins["region_contrib"][0] if ins["region_contrib"] else None
     top_cat = ins["cat_contrib"][0] if ins["cat_contrib"] else None
     ts = datetime.now(timezone.utc).isoformat(timespec="minutes")
-    period = period_str()
+    period = period_str(db, scenario)
 
     E: list[dict] = []
 
@@ -164,7 +164,7 @@ def compute_insight(ds: Dataset, kpi: str = "revenue", flt: dict | None = None,
             "Should I optimize for revenue or margin?",
             "Do you want operational actions or strategic recommendations?",
         ],
-        "period": period_str(),
+        "period": period_str(db, scenario),
         "sources": ds.sources if ds is not None else {},
         "semantic": KPI_META,
     }

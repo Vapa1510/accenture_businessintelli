@@ -53,6 +53,15 @@ def set(key: str, value: Any) -> None:  # noqa: A001 - mirrors cache vocabulary
     _local[key] = (time.time(), raw)
 
 
+def clear() -> None:
+    if _redis:
+        try:
+            _redis.flushdb()
+        except Exception:  # noqa: BLE001
+            pass
+    _local.clear()
+
+
 def backend() -> str:
     return "redis" if _redis else "in-memory"
 

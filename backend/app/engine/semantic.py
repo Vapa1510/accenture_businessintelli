@@ -6,6 +6,7 @@ resolves through here, so a metric means one thing across the whole system.
 """
 from __future__ import annotations
 
+from typing import Any
 from .generator import DAYS, WIN
 
 KPI_META: dict[str, dict] = {
@@ -51,10 +52,25 @@ KPI_META: dict[str, dict] = {
 }
 
 
-def window_idx() -> dict[str, int]:
+from sqlalchemy import func
+from datetime import timedelta
+from .generator import DAYS, WIN, TODAY
+
+
+def window_idx(db: Any = None, scenario: str | None = None) -> dict[str, int]:
     """Current period, prior period, and the longer baseline window."""
+    max_day = DAYS - 1
+    if db is not None and scenario is not None:
+        try:
+            from ..db import Transaction
+            max_date = db.query(func.max(Transaction.date)).filter(Transaction.scenario == scenario).scalar()
+            if max_date is not None:
+                epoch = TODAY - timedelta(days=DAYS - 1)
+                max_day = (max_date - epoch).days
+        except Exception:
+            pass
     return {
-        "cur_start": DAYS - WIN, "cur_end": DAYS - 1,
-        "prev_start": DAYS - 2 * WIN, "prev_end": DAYS - WIN - 1,
-        "base_start": DAYS - WIN - 84, "base_end": DAYS - WIN - 1,
+        "cur_start": max_day - WIN + 1, "cur_end": max_day,
+        "prev_start": max_day - 2 * WIN + 1, "prev_end": max_day - WIN,
+        "base_start": max_day - WIN - 84 + 1, "base_end": max_day - WIN,
     }

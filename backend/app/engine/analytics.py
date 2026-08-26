@@ -246,7 +246,7 @@ def history_days(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
 # materiality scoring — this is the main entry point for detecting what moved
 def detect_movements(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
                      db: Session | None = None, scenario: str | None = None) -> list[dict]:
-    w = window_idx()
+    w = window_idx(db, scenario)
     cur = kpi_agg(F, w["cur_start"], w["cur_end"], flt, db, scenario)
     prev = kpi_agg(F, w["prev_start"], w["prev_end"], flt, db, scenario)
 
@@ -343,7 +343,7 @@ def _log_mean(a: float, b: float) -> float:
 
 def lmdi_revenue(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
                  db: Session | None = None, scenario: str | None = None) -> dict[str, float]:
-    w = window_idx()
+    w = window_idx(db, scenario)
     c = kpi_agg(F, w["cur_start"], w["cur_end"], flt, db, scenario)
     p = kpi_agg(F, w["prev_start"], w["prev_end"], flt, db, scenario)
     d_r = c["revenue"] - p["revenue"]
@@ -359,7 +359,7 @@ def dim_contribution(F: dict[str, pd.DataFrame] | None, dim: str, flt: dict | No
                      db: Session | None = None, scenario: str | None = None) -> list[dict]:
     if db is not None and scenario is not None:
         flt = flt or {}
-        w = window_idx()
+        w = window_idx(db, scenario)
         date_cur_a = date_of(w["cur_start"])
         date_cur_b = date_of(w["cur_end"])
         date_prev_a = date_of(w["prev_start"])
@@ -418,7 +418,7 @@ def dim_contribution(F: dict[str, pd.DataFrame] | None, dim: str, flt: dict | No
         out.sort(key=lambda r: -abs(r["contribution"]))
         return out
 
-    w = window_idx()
+    w = window_idx(db, scenario)
     tx = _apply_filter(F["tx"], flt, ("region", "category"))
     col = "product" if dim == "product" else dim
     if dim == "region":
@@ -447,7 +447,7 @@ DRIVER_LABELS = {
 
 def driver_attribution(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
                        db: Session | None = None, scenario: str | None = None) -> dict[str, Any]:
-    w = window_idx()
+    w = window_idx(db, scenario)
     panel = daily_series(F, w["base_start"], w["cur_end"], flt, db, scenario).dropna(subset=["supply"])
     cols = ["ad_spend", "conv_rate", "price", "supply"]
     panel = panel.fillna(0.0)
@@ -514,7 +514,7 @@ def driver_attribution(F: dict[str, pd.DataFrame] | None, flt: dict | None = Non
 
 def correlations(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
                  db: Session | None = None, scenario: str | None = None) -> list[dict]:
-    w = window_idx()
+    w = window_idx(db, scenario)
     panel = daily_series(F, w["base_start"], w["cur_end"], flt, db, scenario).dropna(subset=["supply"]).fillna(0.0)
     rev = panel["revenue"].to_numpy(dtype=float)
     out = []
@@ -531,7 +531,7 @@ def correlations(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
 def anomaly_days(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
                  db: Session | None = None, scenario: str | None = None) -> list[dict]:
     """IsolationForest flags abnormal days on the daily driver panel."""
-    w = window_idx()
+    w = window_idx(db, scenario)
     panel = daily_series(F, w["base_start"], w["cur_end"], flt, db, scenario).dropna(subset=["supply"]).fillna(0.0)
     feats = panel[["revenue", "orders", "ad_spend", "conv_rate", "price"]].to_numpy(dtype=float)
     if len(feats) < 20:
@@ -551,7 +551,7 @@ def anomaly_days(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
 # these fire independently of the regression, kept separate on purpose
 def business_rules(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
                    db: Session | None = None, scenario: str | None = None) -> dict[str, Any]:
-    w = window_idx()
+    w = window_idx(db, scenario)
     
     if db is not None and scenario is not None:
         flt = flt or {}

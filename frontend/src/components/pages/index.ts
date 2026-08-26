@@ -7,3 +7,4 @@ export { SemanticPage } from './SemanticPage';
 export { FeedbackPage } from './FeedbackPage';
 export { HealthPage } from './HealthPage';
 export { ChatPanel } from './ChatPanel';
+export { SimulatorPage } from './SimulatorPage';

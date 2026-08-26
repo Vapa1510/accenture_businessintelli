@@ -131,6 +131,21 @@ export const postFeedback = (payload: Record<string, unknown>) =>
     body: JSON.stringify(payload),
   });
 
+export const getScenarioDates = (scenario: string) =>
+  req<any>(`/api/scenarios/${scenario}/dates`);
+
+export const simulateDay = (scenario: string, body: { marketing_multiplier: number; stockout_rate?: number; competitor_price_index?: number }) =>
+  req<any>(`/api/scenarios/${scenario}/simulate-day`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+export const resetScenario = (scenario: string) =>
+  req<any>(`/api/scenarios/${scenario}/reset`, {
+    method: "POST",
+  });
+
 export const money = (x: number) => {
   const s = x < 0 ? "-" : "";
   const a = Math.abs(x);

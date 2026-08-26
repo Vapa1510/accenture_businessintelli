@@ -94,3 +94,10 @@ class ChatOut(BaseModel):
     filters: dict[str, str]
     route: dict[str, Any]
     latency_ms: float
+
+
+class SimulateIn(BaseModel):
+    marketing_multiplier: float = 1.0
+    stockout_rate: float | None = None
+    competitor_price_index: float | None = None
+

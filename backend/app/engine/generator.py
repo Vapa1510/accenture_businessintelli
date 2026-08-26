@@ -146,97 +146,123 @@ class Dataset:
     sources: dict = field(default_factory=dict)
 
 
+def generate_day(
+    scenario_key: str,
+    i: int,
+    marketing_mult: float = 1.0,
+    stockout_override: float | None = None,
+    competitor_price_override: float | None = None,
+) -> tuple[list[dict], list[dict], list[dict]]:
+    sc = SCENARIOS[scenario_key]
+    rnd = make_rng(SEED + i * 17)
+    launch_index = DAYS - 18
+    in_curr = i >= DAYS - WIN
+
+    def m(key: str) -> float:
+        return sc.mult[key] if in_curr else 1.0
+
+    d = date_of(i)
+    s = _seasonal(d)
+    t = _trend(i)
+    holiday = 1 if rnd() < 0.03 else 0
+
+    tx_out: list[dict] = []
+    mk_out: list[dict] = []
+    ex_out: list[dict] = []
+
+    for region in REGIONS:
+        if competitor_price_override is not None:
+            comp_idx = competitor_price_override + gauss(rnd, 0, 0.01)
+        else:
+            comp_idx = 1.0 + gauss(rnd, 0, 0.02) + (-0.06 if (scenario_key == "contradictory" and in_curr) else 0.0)
+
+        if stockout_override is not None:
+            stockout = max(0.0, stockout_override + gauss(rnd, 0, 0.005))
+        else:
+            stock_base = 0.04 + max(0.0, gauss(rnd, 0, 0.01))
+            stockout = stock_base + (0.09 if (scenario_key == "revenue_decline" and in_curr and region == "North") else 0.0)
+
+        supply = min(1.0, 0.97 - max(0.0, stockout - 0.04) * 2 + gauss(rnd, 0, 0.01))
+        dropped = sc.drop_external_frac > 0 and in_curr and rnd() < sc.drop_external_frac
+        if not dropped:
+            ex_out.append({
+                "date": iso(d), "region": region,
+                "competitor_price_index": round(comp_idx, 4),
+                "holiday_flag": holiday,
+                "weather_index": round(0.5 + gauss(rnd, 0, 0.15), 3),
+                "supply_availability": round(supply, 3),
+                "stockout_rate": round(max(0.0, stockout), 3),
+            })
+
+        paid_clicks = 0.0
+        for ch in CHANNELS:
+            base_spend = 2600 * REGION_W[region] * CHANNEL_W[ch] * s * t * (0.9 + rnd() * 0.2)
+            spend = base_spend * m("spend") * marketing_mult
+            stale_omit = sc.stale and i >= DAYS - 2
+            ctr = 0.03 + gauss(rnd, 0, 0.004)
+            impressions = round(spend / (0.9 + rnd() * 0.4) * 30)
+            clicks = round(impressions * max(0.005, ctr))
+            cvr_base = 0.05 * m("conv")
+            conversions = round(clicks * max(0.005, cvr_base + gauss(rnd, 0, 0.003)))
+            paid_clicks += clicks
+            if not stale_omit:
+                mk_out.append({
+                    "date": iso(d),
+                    "campaign_id": f"{ch[:2].upper()}-{region[0]}",
+                    "channel": ch, "region": region,
+                    "impressions": impressions, "clicks": clicks,
+                    "ad_spend": round(spend, 2), "conversions": conversions,
+                })
+
+        organic = ORGANIC_BASE * REGION_W[region] * s * t * (0.9 + rnd() * 0.2)
+        sessions = max(50.0, organic + paid_clicks)
+
+        conv_rate = 0.032 * m("conv") * supply * (0.95 + rnd() * 0.1)
+        total_orders = sessions * conv_rate * m("orders")
+
+        for cat in CATEGORIES:
+            cat_share = CAT_W[cat] / sum(CAT_W.values())
+            cat_orders = total_orders * cat_share * (0.9 + rnd() * 0.2)
+            prods = PRODUCTS[cat]
+            mix_tilt = m("mix")
+            weights = [pow(p["premium"], 2.2 if mix_tilt > 1 else 1.0) * (0.9 + rnd() * 0.2) for p in prods]
+            wsum = sum(weights)
+            for pi, p in enumerate(prods):
+                if p.get("new_launch") and scenario_key == "new_product" and i < launch_index:
+                    continue
+                orders = max(0.0, (cat_orders * weights[pi]) / wsum)
+                if orders < 0.01:
+                    continue
+                price_mult = m("price")
+                discount = min(0.5, max(0.0, 0.08 + gauss(rnd, 0, 0.03) +
+                                        (0.02 if (scenario_key == "revenue_decline" and in_curr) else 0.0)))
+                unit_price = p["price"] * price_mult * (1 - discount)
+                units = orders * (1 + rnd() * 0.3)
+                revenue = units * unit_price
+                cost = revenue * (1 - p["margin"]) * (0.98 + rnd() * 0.04)
+                tx_out.append({
+                    "date": iso(d), "region": region, "category": cat,
+                    "product_id": p["id"], "product": p["name"],
+                    "orders": round(orders, 2), "units": round(units, 2),
+                    "avg_selling_price": round(unit_price, 2), "discount": round(discount, 3),
+                    "revenue": round(revenue, 2), "cost": round(cost, 2),
+                    "gross_margin": round(revenue - cost, 2),
+                })
+
+    return tx_out, mk_out, ex_out
+
+
 def generate(scenario_key: str) -> Dataset:
     sc = SCENARIOS[scenario_key]
-    rnd = make_rng(SEED)
-    launch_index = DAYS - 18
-
-    def in_current(i: int) -> bool:
-        return i >= DAYS - WIN
-
-    def m(i: int, key: str) -> float:
-        return sc.mult[key] if in_current(i) else 1.0
-
     transactions: list[dict] = []
     marketing: list[dict] = []
     external: list[dict] = []
 
     for i in range(DAYS):
-        d = date_of(i)
-        s = _seasonal(d)
-        t = _trend(i)
-        holiday = 1 if rnd() < 0.03 else 0
-
-        for region in REGIONS:
-            comp_idx = 1.0 + gauss(rnd, 0, 0.02) + (-0.06 if (scenario_key == "contradictory" and in_current(i)) else 0.0)
-            stock_base = 0.04 + max(0.0, gauss(rnd, 0, 0.01))
-            stockout = stock_base + (0.09 if (scenario_key == "revenue_decline" and in_current(i) and region == "North") else 0.0)
-            supply = min(1.0, 0.97 - max(0.0, stockout - 0.04) * 2 + gauss(rnd, 0, 0.01))
-            dropped = sc.drop_external_frac > 0 and in_current(i) and rnd() < sc.drop_external_frac
-            if not dropped:
-                external.append({
-                    "date": iso(d), "region": region,
-                    "competitor_price_index": round(comp_idx, 4),
-                    "holiday_flag": holiday,
-                    "weather_index": round(0.5 + gauss(rnd, 0, 0.15), 3),
-                    "supply_availability": round(supply, 3),
-                    "stockout_rate": round(max(0.0, stockout), 3),
-                })
-
-            paid_clicks = 0.0
-            for ch in CHANNELS:
-                base_spend = 2600 * REGION_W[region] * CHANNEL_W[ch] * s * t * (0.9 + rnd() * 0.2)
-                spend = base_spend * m(i, "spend")
-                stale_omit = sc.stale and i >= DAYS - 2
-                ctr = 0.03 + gauss(rnd, 0, 0.004)
-                impressions = round(spend / (0.9 + rnd() * 0.4) * 30)
-                clicks = round(impressions * max(0.005, ctr))
-                cvr_base = 0.05 * m(i, "conv")
-                conversions = round(clicks * max(0.005, cvr_base + gauss(rnd, 0, 0.003)))
-                paid_clicks += clicks
-                if not stale_omit:
-                    marketing.append({
-                        "date": iso(d),
-                        "campaign_id": f"{ch[:2].upper()}-{region[0]}",
-                        "channel": ch, "region": region,
-                        "impressions": impressions, "clicks": clicks,
-                        "ad_spend": round(spend, 2), "conversions": conversions,
-                    })
-
-            organic = ORGANIC_BASE * REGION_W[region] * s * t * (0.9 + rnd() * 0.2)
-            sessions = max(50.0, organic + paid_clicks)
-
-            conv_rate = 0.032 * m(i, "conv") * supply * (0.95 + rnd() * 0.1)
-            total_orders = sessions * conv_rate * m(i, "orders")
-
-            for cat in CATEGORIES:
-                cat_share = CAT_W[cat] / sum(CAT_W.values())
-                cat_orders = total_orders * cat_share * (0.9 + rnd() * 0.2)
-                prods = PRODUCTS[cat]
-                mix_tilt = m(i, "mix")
-                weights = [pow(p["premium"], 2.2 if mix_tilt > 1 else 1.0) * (0.9 + rnd() * 0.2) for p in prods]
-                wsum = sum(weights)
-                for pi, p in enumerate(prods):
-                    if p.get("new_launch") and scenario_key == "new_product" and i < launch_index:
-                        continue
-                    orders = max(0.0, (cat_orders * weights[pi]) / wsum)
-                    if orders < 0.01:
-                        continue
-                    price_mult = m(i, "price")
-                    discount = min(0.5, max(0.0, 0.08 + gauss(rnd, 0, 0.03) +
-                                            (0.02 if (scenario_key == "revenue_decline" and in_current(i)) else 0.0)))
-                    unit_price = p["price"] * price_mult * (1 - discount)
-                    units = orders * (1 + rnd() * 0.3)
-                    revenue = units * unit_price
-                    cost = revenue * (1 - p["margin"]) * (0.98 + rnd() * 0.04)
-                    transactions.append({
-                        "date": iso(d), "region": region, "category": cat,
-                        "product_id": p["id"], "product": p["name"],
-                        "orders": round(orders, 2), "units": round(units, 2),
-                        "avg_selling_price": round(unit_price, 2), "discount": round(discount, 3),
-                        "revenue": round(revenue, 2), "cost": round(cost, 2),
-                        "gross_margin": round(revenue - cost, 2),
-                    })
+        tx_day, mk_day, ex_day = generate_day(scenario_key, i)
+        transactions.extend(tx_day)
+        marketing.extend(mk_day)
+        external.extend(ex_day)
 
     sources = {
         "transactions": {"name": "Transaction Database", "grain": "order x product x day",

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import {
   Activity, BrainCircuit, Database, FlaskConical, Layers, Lock, MessageSquare,
-  Play, RefreshCw, Server, ShieldCheck, Sparkles, AlertCircle, ChevronRight,
+  Play, RefreshCw, Server, ShieldCheck, Sparkles, AlertCircle, ChevronRight, Sliders,
 } from "lucide-react";
 import { getInsight, getScenarios, login } from "./api";
 import type { Insight } from "./api";
 import {
   ChatPanel, DriversPage, FeedbackPage, HealthPage, InsightPage, Overview,
-  SemanticPage, SourcesPage,
+  SemanticPage, SourcesPage, SimulatorPage,
 } from "./components/pages/index";
 import { Card } from "./components/ui";
 
@@ -15,6 +15,7 @@ const NAV: [string, string, any][] = [
   ["overview", "Overview", Activity],
   ["insight", "Insight Analysis", Sparkles],
   ["drivers", "Driver Attribution", FlaskConical],
+  ["simulator", "Live Simulator", Sliders],
   ["sources", "Data Sources", Database],
   ["semantic", "Semantic Layer", Layers],
   ["feedback", "Feedback Loop", MessageSquare],
@@ -285,6 +286,7 @@ export default function App() {
           )}
           {!loading && ins && page === "insight" && <InsightPage ins={ins} onClarify={onClarify} />}
           {page === "drivers" && <DriversPage scenario={scenario} />}
+          {page === "simulator" && <SimulatorPage scenario={scenario} reloadInsights={load} />}
           {page === "sources" && <SourcesPage scenario={scenario} />}
           {page === "semantic" && <SemanticPage />}
           {page === "feedback" && <FeedbackPage scenario={scenario} />}
