@@ -131,6 +131,18 @@ export const postFeedback = (payload: Record<string, unknown>) =>
     body: JSON.stringify(payload),
   });
 
+export const ingestData = (payload: { scenario?: string; transactions?: any[]; marketing?: any[]; external?: any[] }) =>
+  req<any>("/api/ingest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+export const seedDatabase = () =>
+  req<any>("/api/seed", {
+    method: "POST",
+  });
+
 export const getScenarioDates = (scenario: string) =>
   req<any>(`/api/scenarios/${scenario}/dates`);
 

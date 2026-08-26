@@ -89,18 +89,19 @@ def kpi_agg(F: dict[str, pd.DataFrame] | None, a: int, b: int, flt: dict | None 
             mk_q = mk_q.filter(Marketing.region == flt["region"])
         mk_res = mk_q.first()
         
-        ad_spend = float(mk_res.ad_spend or 0.0)
-        clicks = float(mk_res.clicks or 0.0)
-        conversions = float(mk_res.conversions or 0.0)
+        ad_spend = float(mk_res.ad_spend or 0.0) if mk_res else 0.0
+        clicks = float(mk_res.clicks or 0.0) if mk_res else 0.0
+        conversions = float(mk_res.conversions or 0.0) if mk_res else 0.0
         
-        return {
-            "revenue": revenue, "orders": orders,
-            "aov": revenue / orders if orders > 0 else 0.0,
-            "gross_margin": gm, "cost": cost,
-            "margin_pct": gm / revenue if revenue > 0 else 0.0,
-            "ad_spend": ad_spend, "clicks": clicks, "conversions": conversions,
-            "conv_rate": conversions / clicks if clicks > 0 else 0.0,
-        }
+        if (revenue > 0 or orders > 0 or ad_spend > 0) or F is None:
+            return {
+                "revenue": revenue, "orders": orders,
+                "aov": revenue / orders if orders > 0 else 0.0,
+                "gross_margin": gm, "cost": cost,
+                "margin_pct": gm / revenue if revenue > 0 else 0.0,
+                "ad_spend": ad_spend, "clicks": clicks, "conversions": conversions,
+                "conv_rate": conversions / clicks if clicks > 0 else 0.0,
+            }
 
     tx = F["tx"]
     tx = tx[(tx.day_idx >= a) & (tx.day_idx <= b)]
@@ -240,7 +241,9 @@ def history_days(F: dict[str, pd.DataFrame] | None, flt: dict | None = None,
             q = q.filter(Transaction.category == flt["category"])
         if flt.get("product_id"):
             q = q.filter(Transaction.product_id == flt["product_id"])
-        return int(q.scalar() or 0)
+        res = int(q.scalar() or 0)
+        if res > 0 or F is None:
+            return res
 
     tx = _apply_filter(F["tx"], flt, ("region", "category", "product_id"))
     return int(tx.date.nunique()) if not tx.empty else 0
@@ -419,7 +422,8 @@ def dim_contribution(F: dict[str, pd.DataFrame] | None, dim: str, flt: dict | No
                 "contribution": cur_val - prev_val
             })
         out.sort(key=lambda r: -abs(r["contribution"]))
-        return out
+        if any(r["current"] > 0 or r["previous"] > 0 for r in out) or F is None:
+            return out
 
     w = window_idx(db, scenario)
     tx = _apply_filter(F["tx"], flt, ("region", "category"))

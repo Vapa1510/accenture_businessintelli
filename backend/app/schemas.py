@@ -101,3 +101,10 @@ class SimulateIn(BaseModel):
     stockout_rate: float | None = None
     competitor_price_index: float | None = None
 
+
+class IngestIn(BaseModel):
+    scenario: str = "custom_ingested"
+    transactions: list[dict[str, Any]] = []
+    marketing: list[dict[str, Any]] = []
+    external: list[dict[str, Any]] = []
+

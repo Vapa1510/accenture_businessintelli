@@ -38,7 +38,7 @@ from .engine.insight import compute_insight
 from .engine.narrative import (allowed_numbers, narrate, narrate_live,
                                validate_narrative)
 from .engine.semantic import KPI_META, window_idx
-from .schemas import (ChatIn, ChatOut, FeedbackIn, InsightResponse, SimulateIn,
+from .schemas import (ChatIn, ChatOut, FeedbackIn, IngestIn, InsightResponse, SimulateIn,
                       TokenResponse)
 
 @asynccontextmanager
@@ -316,6 +316,87 @@ def health(db: Session = Depends(get_db)):
                     "cache_hit": r.cache_hit, "provider": r.provider,
                     "abstained": r.abstained, "confidence": r.confidence} for r in rows[:12]],
     }
+
+
+@app.post("/api/ingest")
+def ingest_data(body: IngestIn, db: Session = Depends(get_db)):
+    """Ingests custom JSON / CSV records for transactions, marketing, and external context."""
+    from datetime import date
+    from .engine.generator import TODAY
+    
+    tx_count, mk_count, ex_count = 0, 0, 0
+    try:
+        db.query(Transaction).filter(Transaction.scenario == body.scenario).delete()
+        db.query(Marketing).filter(Marketing.scenario == body.scenario).delete()
+        db.query(External).filter(External.scenario == body.scenario).delete()
+
+        for item in body.transactions:
+            t_date = date.fromisoformat(str(item["date"])) if "date" in item else TODAY
+            db.add(Transaction(
+                scenario=body.scenario, date=t_date,
+                region=item.get("region", "North"),
+                category=item.get("category", "Electronics"),
+                product_id=item.get("product_id", "EL-1"),
+                product=item.get("product", "AuroraBook 14"),
+                orders=float(item.get("orders", 1.0)),
+                units=float(item.get("units", 1.0)),
+                avg_selling_price=float(item.get("avg_selling_price", 100.0)),
+                discount=float(item.get("discount", 0.0)),
+                revenue=float(item.get("revenue", 100.0)),
+                cost=float(item.get("cost", 70.0)),
+                gross_margin=float(item.get("gross_margin", 30.0))
+            ))
+            tx_count += 1
+
+        for item in body.marketing:
+            m_date = date.fromisoformat(str(item["date"])) if "date" in item else TODAY
+            db.add(Marketing(
+                scenario=body.scenario, date=m_date,
+                campaign_id=item.get("campaign_id", "PA-N"),
+                channel=item.get("channel", "Paid Search"),
+                region=item.get("region", "North"),
+                impressions=int(item.get("impressions", 1000)),
+                clicks=int(item.get("clicks", 50)),
+                ad_spend=float(item.get("ad_spend", 200.0)),
+                conversions=int(item.get("conversions", 5))
+            ))
+            mk_count += 1
+
+        for item in body.external:
+            e_date = date.fromisoformat(str(item["date"])) if "date" in item else TODAY
+            db.add(External(
+                scenario=body.scenario, date=e_date,
+                region=item.get("region", "North"),
+                competitor_price_index=float(item.get("competitor_price_index", 1.0)),
+                holiday_flag=int(item.get("holiday_flag", 0)),
+                weather_index=float(item.get("weather_index", 0.5)),
+                supply_availability=float(item.get("supply_availability", 0.95)),
+                stockout_rate=float(item.get("stockout_rate", 0.05))
+            ))
+            ex_count += 1
+
+        db.commit()
+        cache.clear()
+        return {
+            "status": "success",
+            "scenario": body.scenario,
+            "records_ingested": {"transactions": tx_count, "marketing": mk_count, "external": ex_count}
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Data ingestion failed: {str(e)}")
+
+
+@app.post("/api/seed")
+def seed_database(db: Session = Depends(get_db)):
+    """Populates database with synthetic records for all 4 scenarios."""
+    try:
+        from .seed import seed
+        seed()
+        cache.clear()
+        return {"status": "success", "message": "Seeded database with all 4 scenario datasets."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 # --------------------------------------------------------------------------
