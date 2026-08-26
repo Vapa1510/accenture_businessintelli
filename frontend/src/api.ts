@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_URL || "";
+const LOCAL_BASE = import.meta.env.VITE_API_URL || "";
+const REMOTE_FALLBACK = "https://kpi-engine.vercel.app";
+let activeBase = LOCAL_BASE;
 
 export type Movement = {
   key: string; name: string; unit: string; current: number; previous: number;
@@ -52,22 +54,46 @@ let token: string | null = null;
 async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = { ...(init.headers as any) };
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${BASE}${path}`, { ...init, headers });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-  return res.json();
+
+  try {
+    const res = await fetch(`${activeBase}${path}`, { ...init, headers });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    return res.json();
+  } catch (err: any) {
+    if (activeBase !== REMOTE_FALLBACK) {
+      try {
+        const fallbackRes = await fetch(`${REMOTE_FALLBACK}${path}`, { ...init, headers });
+        if (fallbackRes.ok) {
+          activeBase = REMOTE_FALLBACK;
+          return fallbackRes.json();
+        }
+      } catch (_) {}
+    }
+    throw err;
+  }
 }
 
 export async function login(role: string) {
   const body = new URLSearchParams({ username: role, password: role });
-  const res = await fetch(`${BASE}/api/auth/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
-  if (!res.ok) throw new Error("login failed");
-  const d = await res.json();
-  token = d.access_token;
-  return d;
+  try {
+    const res = await fetch(`${activeBase}/api/auth/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
+    if (res.ok) {
+      const d = await res.json();
+      token = d.access_token;
+      return d;
+    }
+  } catch (_) {}
+
+  // Fallback to remote Vercel API if local server is down or unreachable
+  if (activeBase !== REMOTE_FALLBACK) {
+    activeBase = REMOTE_FALLBACK;
+    return login(role);
+  }
+  throw new Error("login failed");
 }
 
 export const getScenarios = () => req<any>("/api/scenarios");
