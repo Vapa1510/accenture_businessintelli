@@ -142,10 +142,13 @@ def insight(scenario: str = "revenue_decline", kpi: str = "revenue",
     visible = redact_for_role(ins, role)
     latency = (time.perf_counter() - t0) * 1000
 
-    db.add(InsightLog(scenario=scenario, kpi=kpi, role=role["key"], latency_ms=latency,
-                      cache_hit=cache_hit, llm_used=bool(live), provider=nar["provider"],
-                      abstained=ins["abstain"], confidence=ins["confidence"]["score"]))
-    db.commit()
+    try:
+        db.add(InsightLog(scenario=scenario, kpi=kpi, role=role["key"], latency_ms=latency,
+                          cache_hit=cache_hit, llm_used=bool(live), provider=nar["provider"],
+                          abstained=ins["abstain"], confidence=ins["confidence"]["score"]))
+        db.commit()
+    except Exception:
+        pass
 
     return {
         **visible,
@@ -245,11 +248,14 @@ def chat(body: ChatIn, role: dict = Depends(current_role), db: Session = Depends
             answer = f"{nar['headline']}{scope}. {nar['paragraphs'][0]}"
 
     latency = (time.perf_counter() - t0) * 1000
-    db.add(InsightLog(scenario=body.scenario, kpi="revenue", role=role["key"],
-                      latency_ms=latency, cache_hit=False, llm_used=route["llm"],
-                      provider=route["model"], abstained=ins["abstain"],
-                      confidence=ins["confidence"]["score"]))
-    db.commit()
+    try:
+        db.add(InsightLog(scenario=body.scenario, kpi="revenue", role=role["key"],
+                          latency_ms=latency, cache_hit=False, llm_used=route["llm"],
+                          provider=route["model"], abstained=ins["abstain"],
+                          confidence=ins["confidence"]["score"]))
+        db.commit()
+    except Exception:
+        pass
     return ChatOut(answer=answer, intent=intent, filters=filters, route=route,
                    latency_ms=round(latency, 1))
 
