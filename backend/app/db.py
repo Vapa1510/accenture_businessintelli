@@ -1,7 +1,7 @@
 """Database layer.
 
-PostgreSQL in Docker; falls back to a local SQLite file if DATABASE_URL is not
-set, so the backend runs with no infrastructure at all.
+PostgreSQL in Docker; falls back to a local SQLite file (or /tmp on serverless)
+if DATABASE_URL is not set, so the backend runs with no infrastructure at all.
 """
 from __future__ import annotations
 
@@ -11,7 +11,13 @@ from sqlalchemy import (Boolean, Column, Date, Float, Integer, String, Text,
                         create_engine, func)
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./kpi_engine.db")
+db_url = os.getenv("DATABASE_URL")
+if not db_url:
+    if os.getenv("VERCEL"):
+        db_url = "sqlite:////tmp/kpi_engine.db"
+    else:
+        db_url = "sqlite:///./kpi_engine.db"
+DATABASE_URL = db_url
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
@@ -110,3 +116,13 @@ def get_db():
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
+    try:
+        db = SessionLocal()
+        if db.query(User).count() == 0:
+            from .auth import hash_password, ROLES
+            for role_name in ROLES:
+                db.add(User(username=role_name, hashed_password=hash_password(role_name), role=role_name))
+            db.commit()
+        db.close()
+    except Exception:
+        pass

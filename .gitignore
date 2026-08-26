@@ -28,3 +28,5 @@ test_api.db
 
 # build
 *.log
+
+.vercel
