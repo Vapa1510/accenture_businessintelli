@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NovaMart KPI Engine — UI/UX Frame Catalog & Design System</title>
+<style>
+  @page {
+    size: 297mm 210mm; /* A4 Landscape */
+    margin: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background: #0B0F17;
+    color: #F1F5F9;
+    -webkit-print-color-adjust: exact;
+  }
+  .page {
+    width: 297mm;
+    height: 210mm;
+    padding: 14mm 18mm;
+    position: relative;
+    page-break-after: always;
+    background: #0B0F17;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Header structure */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1E293B;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .page-title {
+    font-size: 16pt;
+    font-weight: 800;
+    color: #F8FAFC;
+    letter-spacing: -0.3px;
+  }
+  .page-subtitle {
+    font-size: 8.5pt;
+    color: #94A3B8;
+  }
+  .badge-tag {
+    background: rgba(161, 0, 255, 0.2);
+    color: #C084FC;
+    border: 1px solid rgba(161, 0, 255, 0.4);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* Footer bar */
+  .page-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #1E293B;
+    padding-top: 6px;
+    font-size: 7.5pt;
+    color: #64748B;
+    font-family: monospace;
+  }
+
+  /* Image Containers */
+  .img-frame {
+    width: 100%;
+    height: 122mm;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+
+  /* Layout grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* Cards */
+  .card {
+    background: #121824;
+    border: 1px solid #1E293B;
+    border-radius: 6px;
+    padding: 8px 12px;
+  }
+  .card-purple { border-left: 3px solid #A100FF; }
+  .card-emerald { border-left: 3px solid #10B981; }
+  .card-amber { border-left: 3px solid #F59E0B; }
+  .card-cyan { border-left: 3px solid #06B6D4; }
+
+  .card-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #F1F5F9;
+    margin-bottom: 4px;
+  }
+
+  p, li {
+    font-size: 8pt;
+    color: #CBD5E1;
+    line-height: 1.45;
+  }
+  ul { padding-left: 14px; }
+  li { margin-bottom: 3px; }
+
+  /* Color Palette Swatches */
+  .swatch-group { display: flex; gap: 8px; margin-top: 6px; }
+  .swatch {
+    flex: 1;
+    height: 38px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 6.5pt;
+    font-weight: bold;
+    color: #FFF;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ PAGE 1: COVER & DESIGN SYSTEM ════════════════════ -->
+<div class="page">
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+      <div>
+        <span class="badge-tag">UI/UX FRAME CATALOG & DESIGN SYSTEM</span>
+        <h1 style="font-size: 26pt; font-weight: 900; color: #FFF; margin-top: 6px; letter-spacing: -0.5px;">
+          NovaMart Intelligence Platform
+        </h1>
+        <p style="font-size: 11pt; color: #94A3B8; margin-top: 4px;">
+          Comprehensive Interface Frame Design, Component Hierarchy &amp; Role-Based UI Architecture
+        </p>
+      </div>
+      <div style="text-align: right; font-family: monospace; font-size: 8.5pt; color: #64748B;">
+        <div>Accenture Hackathon Round 2</div>
+        <div>Problem Track 3</div>
+        <div style="color: #34D399; margin-top: 2px;">https://kpi-engine.vercel.app</div>
+      </div>
+    </div>
+
+    <!-- Design Tokens & Palette -->
+    <div class="card card-purple" style="margin-bottom: 12px; padding: 10px 14px;">
+      <div class="card-title">🎨 UI/UX Design System Tokens &amp; Color Palette</div>
+      <p style="font-size: 8.5pt; margin-bottom: 8px;">
+        Designed with a state-of-the-art dark glassmorphism aesthetic (#0B0F17 base), vibrant signal accents, curated typography (Segoe UI / Consolas), and server-side RBAC component visibility.
+      </p>
+      <div class="swatch-group">
+        <div class="swatch" style="background: #0B0F17;">#0B0F17<span>Canvas Base</span></div>
+        <div class="swatch" style="background: #121824;">#121824<span>Card Surface</span></div>
+        <div class="swatch" style="background: #1E293B;">#1E293B<span>Border Stroke</span></div>
+        <div class="swatch" style="background: #A100FF;">#A100FF<span>Accent Purple</span></div>
+        <div class="swatch" style="background: #10B981;">#10B981<span>Emerald Success</span></div>
+        <div class="swatch" style="background: #F59E0B;">#F59E0B<span>Amber Alert</span></div>
+        <div class="swatch" style="background: #F43F5E;">#F43F5E<span>Rose Danger</span></div>
+        <div class="swatch" style="background: #06B6D4;">#06B6D4<span>Cyan Telemetry</span></div>
+      </div>
+    </div>
+
+    <!-- Summary of Platform Sections -->
+    <div class="grid-3">
+      <div class="card card-emerald">
+        <div class="card-title">📊 Executive &amp; Analytical Views</div>
+        <ul>
+          <li><strong>Overview Dashboard:</strong> KPI Cards, Priority Badges, LMDI Factor Bar Chart, 5-Signal Confidence Meter.</li>
+          <li><strong>Insight Analysis:</strong> Persona Narrative, Output Validation Badge, What-If Action Sandbox, Evidence Lineage.</li>
+        </ul>
+      </div>
+
+      <div class="card card-amber">
+        <div class="card-title">⚠️ Governance &amp; Diagnostics</div>
+        <ul>
+          <li><strong>Abstention Protocol:</strong> Low confidence alert, root cause failure logs, interactive clarification chips.</li>
+          <li><strong>Driver Attribution:</strong> OLS Beta Table, Pearson vs Spearman matrix, Hierarchical drill-down breadcrumbs.</li>
+        </ul>
+      </div>
+
+      <div class="card card-cyan">
+        <div class="card-title">⚡ Interactive Labs &amp; Admin</div>
+        <ul>
+          <li><strong>Scenario Simulator:</strong> Parameter shock sliders, sprint duration trigger, live SQLite row counters.</li>
+          <li><strong>Data Sources &amp; Health:</strong> Pipeline freshness matrix, JSON custom data ingestion, latency P95 charts.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart KPI Engine | UI/UX Catalog</div>
+    <div>Page 1 of 6</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 2: OVERVIEW DASHBOARD FRAME ════════════════════ -->
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">1. Overview Dashboard UI Frame</div>
+        <div class="page-subtitle">Prioritized KPI Movements, LMDI Revenue Waterfall, Materiality Ledger &amp; 5-Signal Confidence Gauge</div>
+      </div>
+      <span class="badge-tag">FRAME 01 &bull; OVERVIEW</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/.gemini/antigravity/brain/27c306f2-825f-4a66-b937-faf17cdaa02e/ui_overview_dashboard_1788092094886.png" class="img-frame" alt="Overview Dashboard Frame" />
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div class="card card-purple">
+        <div class="card-title">💡 Core UI Components &amp; Interactions</div>
+        <ul>
+          <li><strong>Scenario &amp; Role Selectors:</strong> Dynamic dropdowns switching data payloads and server-side RBAC redaction.</li>
+          <li><strong>9-Stage Pipeline Animation:</strong> Animated modal rendering fetch &rarr; reconcile &rarr; detection &rarr; validation.</li>
+          <li><strong>Materiality Ledger:</strong> Ranks KPI shifts via score $= 0.4	ext{impact} + 0.3	ext{deviation} + 0.2	ext{abnormality} + 0.1	ext{strategic}$.</li>
+        </ul>
+      </div>
+      <div class="card card-emerald">
+        <div class="card-title">🔐 Role-Based View Variations</div>
+        <ul>
+          <li><strong>Executive:</strong> Full visibility across Revenue, Orders, AOV, Margin, Conversion + Action approval.</li>
+          <li><strong>Marketing Manager:</strong> Gross Margin card replaced with server-side restricted lock badge.</li>
+          <li><strong>Operations Manager:</strong> Marketing metrics stripped at API layer; inventory approvals enabled.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart KPI Engine | UI/UX Catalog</div>
+    <div>Page 2 of 6</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 3: INSIGHT ANALYSIS FRAME ════════════════════ -->
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">2. Insight Analysis &amp; What-If Sandbox Frame</div>
+        <div class="page-subtitle">Persona Synthesis, Output Validation Badge, Interactive Decision Sliders &amp; Auditable Evidence Ledger</div>
+      </div>
+      <span class="badge-tag">FRAME 02 &bull; INSIGHT</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/.gemini/antigravity/brain/27c306f2-825f-4a66-b937-faf17cdaa02e/ui_insight_analysis_1788092126157.png" class="img-frame" alt="Insight Analysis Frame" />
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div class="card card-purple">
+        <div class="card-title">🧪 Interactive What-If Decision Sandbox</div>
+        <ul>
+          <li><strong>Budget &amp; Pricing Sliders:</strong> Test counterfactual policy adjustments in real time (-30% to +30%).</li>
+          <li><strong>Projected Monthly Delta:</strong> Dynamically computes net dollar impact via regression coefficients.</li>
+          <li><strong>One-Click Brief Copy:</strong> Formats executive markdown briefing directly to user clipboard.</li>
+        </ul>
+      </div>
+      <div class="card card-emerald">
+        <div class="card-title">🛡️ Guardrail Badges &amp; Lineage Ledger</div>
+        <ul>
+          <li><strong>Output Validation Checkmark:</strong> Confirms zero LLM hallucinations via numeric whitelist verification.</li>
+          <li><strong>Associational Guard:</strong> Rejects ungrounded causal claims; displays explicit statistical disclaimers.</li>
+          <li><strong>Traceable Evidence Ledger:</strong> Binds every narrative sentence to an evidence ID <code>[E101-E110]</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart KPI Engine | UI/UX Catalog</div>
+    <div>Page 3 of 6</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 4: SELECTIVE ABSTENTION FRAME ════════════════════ -->
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">3. Selective Abstention Protocol Frame</div>
+        <div class="page-subtitle">Honest AI Refusal, Low-Confidence Warning Banner, Data Failure Logs &amp; Clarification Chips</div>
+      </div>
+      <span class="badge-tag">FRAME 03 &bull; ABSTENTION</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/.gemini/antigravity/brain/27c306f2-825f-4a66-b937-faf17cdaa02e/ui_abstention_panel_1788092142750.png" class="img-frame" alt="Abstention Protocol Frame" />
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div class="card card-amber">
+        <div class="card-title">⚠️ The 3 Machine-Enforced Abstention Triggers</div>
+        <ul>
+          <li><strong>1. Sparse History (&lt;30 Days):</strong> Refuses baseline analysis for newly launched products or categories.</li>
+          <li><strong>2. Contradictory Evidence:</strong> Stale marketing data (&gt;26h) + cross-source agreement &lt;0.50 triggers pause.</li>
+          <li><strong>3. Low Confidence (&lt;60%):</strong> Overall 5-factor composite score falls below recommendation threshold.</li>
+        </ul>
+      </div>
+      <div class="card card-purple">
+        <div class="card-title">💬 Interactive Clarification Query Chips</div>
+        <ul>
+          <li><strong>Zero-Guessing Philosophy:</strong> Replaces hallucinated advice with explicit failure diagnostic logs.</li>
+          <li><strong>Interactive Chips:</strong> Clickable prompt pills auto-populate the Analyst Chat drawer.</li>
+          <li><strong>Human-in-the-Loop Recovery:</strong> Prompts business users to refresh stale pipelines or adjust baselines.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart KPI Engine | UI/UX Catalog</div>
+    <div>Page 4 of 6</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 5: DRIVER ATTRIBUTION FRAME ════════════════════ -->
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">4. Driver Attribution &amp; Diagnostics Frame</div>
+        <div class="page-subtitle">OLS Panel Regression, Pearson/Spearman Matrix, Business Rules &amp; IsolationForest Anomalies</div>
+      </div>
+      <span class="badge-tag">FRAME 04 &bull; DRIVERS</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/.gemini/antigravity/brain/27c306f2-825f-4a66-b937-faf17cdaa02e/ui_driver_attribution_1788092159532.png" class="img-frame" alt="Driver Attribution Frame" />
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div class="card card-cyan">
+        <div class="card-title">🔬 Statistical Attribution &amp; Correlation Check</div>
+        <ul>
+          <li><strong>OLS Panel Regression:</strong> Displays standardized &beta; strength bars, R&sup2; fit, and p-value significance.</li>
+          <li><strong>Dual Correlation Matrix:</strong> Evaluates linear Pearson $r$ alongside rank Spearman $ho$ to flag non-linear drift.</li>
+          <li><strong>Feedback Weight Tuning:</strong> Analyst corrections automatically penalize disproven driver weights.</li>
+        </ul>
+      </div>
+      <div class="card card-purple">
+        <div class="card-title">🌲 Anomaly Detection &amp; Breadcrumb Drill-Down</div>
+        <ul>
+          <li><strong>IsolationForest Anomalies:</strong> Unsupervised ML flags multi-dimensional outlier dates.</li>
+          <li><strong>Auditable Business Rules:</strong> Independent IF-THEN triggers (e.g. <code>stockout_rate &gt; 10%</code>).</li>
+          <li><strong>Hierarchical Drill-Down:</strong> Interactive navigation: Revenue &rarr; Region &rarr; Category &rarr; Product.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart KPI Engine | UI/UX Catalog</div>
+    <div>Page 5 of 6</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ PAGE 6: SIMULATOR & SOURCES FRAME ════════════════════ -->
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">5. Scenario Simulator &amp; Data Sources Ingestion Frame</div>
+        <div class="page-subtitle">Interactive Parameter Shocks, Sprint Progression, Pipeline SLA Audit &amp; Custom JSON Ingest</div>
+      </div>
+      <span class="badge-tag">FRAME 05 &bull; SIMULATOR &amp; SOURCES</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/.gemini/antigravity/brain/27c306f2-825f-4a66-b937-faf17cdaa02e/ui_simulator_sources_1788092175493.png" class="img-frame" alt="Simulator & Sources Frame" />
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div class="card card-emerald">
+        <div class="card-title">🎮 Time-Machine Simulator Controls</div>
+        <ul>
+          <li><strong>Parameter Shocks:</strong> Marketing Spend (0.1x-3.0x), Stockouts (0-50%), Competitor Pricing (0.7x-1.3x).</li>
+          <li><strong>Sprint Duration Selector:</strong> Advance scenario time by 1, 7, or 14 days into the live database.</li>
+          <li><strong>Live Row Counters:</strong> Monitors active SQLite record additions for transactions, marketing, external context.</li>
+        </ul>
+      </div>
+      <div class="card card-purple">
+        <div class="card-title">📥 Data Pipeline SLA &amp; JSON Ingest Portal</div>
+        <ul>
+          <li><strong>Freshness SLA Monitoring:</strong> Tracks refresh latency against SLA bounds; flags stale feeds.</li>
+          <li><strong>One-Click Seed:</strong> Re-populates 365 days of reproducible mulberry32 PRNG benchmark datasets.</li>
+          <li><strong>Custom JSON Ingestion:</strong> Ingest custom order, campaign, or regional macro JSON records into SQLite.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart KPI Engine | UI/UX Catalog</div>
+    <div>Page 6 of 6</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -47,7 +47,13 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="KPI Intelligence-to-Action Engine", version="1.0.0", lifespan=lifespan)
+app = FastAPI(
+    title="KPI Intelligence-to-Action Engine",
+    version="1.0.0",
+    lifespan=lifespan,
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
+)
 
 app.add_middleware(
     CORSMiddleware,

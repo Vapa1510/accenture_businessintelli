@@ -1,0 +1,795 @@
+import puppeteer from 'puppeteer';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import fs from 'fs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const htmlPath = path.resolve(__dirname, 'pitch_deck.html');
+const pdfPath = path.resolve(__dirname, 'Accenture_KPI_Engine_Pitch_Deck.pdf');
+
+const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Accenture KPI Engine — Executive Pitch Deck</title>
+<style>
+  @page {
+    size: 297mm 210mm; /* A4 Landscape */
+    margin: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background: #0B0F17;
+    color: #F1F5F9;
+    -webkit-print-color-adjust: exact;
+  }
+  .slide {
+    width: 297mm;
+    height: 210mm;
+    padding: 16mm 20mm;
+    position: relative;
+    page-break-after: always;
+    background: #0B0F17;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Slide Background accents */
+  .slide::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(161, 0, 255, 0.12) 0%, rgba(11, 15, 23, 0) 70%);
+    pointer-events: none;
+  }
+
+  /* Footer bar */
+  .slide-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #1E293B;
+    padding-top: 8px;
+    font-size: 8pt;
+    color: #64748B;
+    font-family: monospace;
+  }
+  .slide-footer .logo-mark {
+    color: #A100FF;
+    font-weight: bold;
+  }
+
+  /* Header structure */
+  .slide-header {
+    margin-bottom: 12px;
+  }
+  .slide-tag {
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #A100FF;
+    margin-bottom: 4px;
+  }
+  .slide-title {
+    font-size: 20pt;
+    font-weight: 800;
+    color: #F8FAFC;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .slide-subtitle {
+    font-size: 10.5pt;
+    color: #94A3B8;
+    margin-top: 4px;
+  }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+  /* Cards */
+  .card {
+    background: #121824;
+    border: 1px solid #1E293B;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .card-purple { border-left: 3px solid #A100FF; }
+  .card-emerald { border-left: 3px solid #10B981; }
+  .card-amber { border-left: 3px solid #F59E0B; }
+  .card-cyan { border-left: 3px solid #06B6D4; }
+
+  .card-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #F1F5F9;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  p, li {
+    font-size: 9pt;
+    color: #CBD5E1;
+    line-height: 1.5;
+  }
+
+  ul { padding-left: 16px; }
+  li { margin-bottom: 4px; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-purple { background: rgba(161,0,255,0.2); color: #C084FC; border: 1px solid rgba(161,0,255,0.4); }
+  .badge-emerald { background: rgba(16,185,129,0.2); color: #34D399; border: 1px solid rgba(16,185,129,0.4); }
+  .badge-amber { background: rgba(245,158,11,0.2); color: #FBBF24; border: 1px solid rgba(245,158,11,0.4); }
+  .badge-rose { background: rgba(244,63,94,0.2); color: #FB7185; border: 1px solid rgba(244,63,94,0.4); }
+  .badge-slate { background: rgba(148,163,184,0.15); color: #94A3B8; border: 1px solid rgba(148,163,184,0.3); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.2pt;
+    margin-top: 4px;
+  }
+  th {
+    background: #1E293B;
+    color: #F8FAFC;
+    text-align: left;
+    padding: 5px 8px;
+    font-weight: 700;
+    border-bottom: 1px solid #334155;
+  }
+  td {
+    padding: 4.5px 8px;
+    border-bottom: 1px solid #1E293B;
+    color: #CBD5E1;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: rgba(30, 41, 59, 0.3); }
+
+  /* Code & Pre */
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 8pt;
+    background: #0F172A;
+    color: #38BDF8;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  /* Metric stat boxes */
+  .stat-box {
+    background: #182232;
+    border: 1px solid #28364D;
+    border-radius: 6px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .stat-val {
+    font-size: 16pt;
+    font-weight: 800;
+    color: #F8FAFC;
+    line-height: 1.1;
+  }
+  .stat-lbl {
+    font-size: 7.5pt;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  /* Highlights */
+  .highlight-purple { color: #C084FC; font-weight: 600; }
+  .highlight-emerald { color: #34D399; font-weight: 600; }
+  .highlight-amber { color: #FBBF24; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ SLIDE 1: COVER + TEAM ════════════════════ -->
+<section class="slide" style="justify-content: space-between;">
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+      <div>
+        <span class="badge badge-purple" style="font-size: 9pt; padding: 4px 10px; margin-bottom: 10px;">ACCENTURE HACKATHON — ROUND 2</span>
+        <h1 style="font-size: 32pt; font-weight: 900; color: #FFF; letter-spacing: -1px; line-height: 1.1; margin-top: 8px;">
+          KPI Intelligence-to-Action Engine
+        </h1>
+        <p style="font-size: 14pt; color: #94A3B8; margin-top: 8px; font-weight: 400;">
+          Deterministic Root-Cause Attribution, Principled Abstention & Governance for Enterprise Analytics
+        </p>
+      </div>
+      <div style="text-align: right;">
+        <span class="badge badge-emerald" style="font-size: 9.5pt; padding: 5px 12px;">PROBLEM TRACK 3</span>
+        <div style="font-size: 8.5pt; color: #64748B; margin-top: 6px; font-family: monospace;">NovaMart E-Commerce Benchmark</div>
+      </div>
+    </div>
+
+    <!-- 4 Feature Highlight Banner Cards -->
+    <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;">
+      <div class="stat-box" style="border-top: 3px solid #A100FF;">
+        <div class="stat-val" style="color: #C084FC;">100%</div>
+        <div class="stat-lbl">Deterministic Math (Python)</div>
+      </div>
+      <div class="stat-box" style="border-top: 3px solid #10B981;">
+        <div class="stat-val" style="color: #34D399;">0%</div>
+        <div class="stat-lbl">Hallucinated Numbers</div>
+      </div>
+      <div class="stat-box" style="border-top: 3px solid #F59E0B;">
+        <div class="stat-val" style="color: #FBBF24;">3 Triggers</div>
+        <div class="stat-lbl">Honest Abstention Protocol</div>
+      </div>
+      <div class="stat-box" style="border-top: 3px solid #06B6D4;">
+        <div class="stat-val" style="color: #38BDF8;">91.5%</div>
+        <div class="stat-lbl">LLM Cost Avoidance Rate</div>
+      </div>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="grid-2">
+      <div class="card card-purple">
+        <div class="card-title">🌐 Live Production Deployment & Repository</div>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 6px;"><strong>Live Web Application:</strong> <code style="color: #C084FC;">https://kpi-engine.vercel.app</code></li>
+          <li style="margin-bottom: 6px;"><strong>GitHub Repository:</strong> <code style="color: #38BDF8;">github.com/Vapa1510/accenture_businessintelli</code></li>
+          <li><strong>Architecture:</strong> FastAPI (Python 3.11) + React (TypeScript) + Vercel Serverless / Docker</li>
+        </ul>
+      </div>
+
+      <div class="card card-emerald">
+        <div class="card-title">🏆 Verification & Reliability Highlights</div>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 6px;"><strong>Test Suite:</strong> 39 Automated PyTest verification checks (19 engine, 20 API/RBAC)</li>
+          <li style="margin-bottom: 6px;"><strong>Ground Truth Recovery:</strong> Injected synthetic drivers deterministically recovered</li>
+          <li><strong>RBAC & Security:</strong> Server-side payload redaction & role-gated approval workflows</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Slide 1 of 7</div>
+    <div>Accenture Innovation Challenge 2026 | <span class="logo-mark">Accenture</span></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SLIDE 2: PROBLEM ════════════════════ -->
+<section class="slide">
+  <div>
+    <div class="slide-header">
+      <div class="slide-tag">Problem Statement &amp; Market Friction</div>
+      <div class="slide-title">The Dilemma of AI in Enterprise Analytics</div>
+      <div class="slide-subtitle">Why existing BI dashboards and GenAI wrappers fail in production finance &amp; operations</div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom: 16px;">
+      <!-- Column 1 -->
+      <div class="card card-amber">
+        <div class="card-title">
+          <span class="badge badge-amber">FLAW #1</span> Generic Dashboards
+        </div>
+        <p style="font-weight: 700; color: #F8FAFC; margin-bottom: 6px;">Show "What", Never "Why"</p>
+        <ul>
+          <li>Display static metrics and percentage swings, forcing analysts into manual data slicing.</li>
+          <li>Offer zero factor decomposition (e.g. orders volume vs price/mix impact).</li>
+          <li>No confidence scores — display stale or corrupt data with the same authority as clean data.</li>
+        </ul>
+      </div>
+
+      <!-- Column 2 -->
+      <div class="card card-rose" style="border-left: 3px solid #F43F5E;">
+        <div class="card-title">
+          <span class="badge badge-rose">FLAW #2</span> Unfenced LLM Wrappers
+        </div>
+        <p style="font-weight: 700; color: #F8FAFC; margin-bottom: 6px;">Invent Numbers &amp; False Causality</p>
+        <ul>
+          <li>Allow LLMs to compute or guess financial metrics directly, leading to confident hallucinations.</li>
+          <li>Confuse correlation with causality, making unfounded claims without statistical validation.</li>
+          <li>Always produce an answer, even when data is 29h stale or historical context is missing.</li>
+        </ul>
+      </div>
+
+      <!-- Column 3 -->
+      <div class="card card-purple">
+        <div class="card-title">
+          <span class="badge badge-purple">THE NEED</span> Financial Truth
+        </div>
+        <p style="font-weight: 700; color: #F8FAFC; margin-bottom: 6px;">Guaranteed Lineage &amp; Honest Refusal</p>
+        <ul>
+          <li><strong>Zero-Hallucination Guarantee:</strong> 100% of numbers computed deterministically in Python.</li>
+          <li><strong>Principled Abstention:</strong> Explicitly state "I don't know" when evidence is weak.</li>
+          <li><strong>Server-Side RBAC:</strong> Redact restricted metrics before payload leaves the API.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Breakdown Box -->
+    <div class="card card-emerald">
+      <div class="card-title">💡 Core Thesis: The Separation of Computation and Explanation</div>
+      <p style="font-size: 9.5pt;">
+        In enterprise finance, a wrong number is far more dangerous than a boring sentence. Our engine enforces a strict boundary:
+        <span class="highlight-purple">Python handles 100% of statistical math</span> (LMDI factor splits, OLS panel regression, Z-scores), while the
+        <span class="highlight-emerald">LLM is restricted solely to writing prose</span> — and every generated figure is checked post-hoc against a numeric whitelist before reaching the user.
+      </p>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Slide 2 of 7</div>
+    <div>Accenture Innovation Challenge 2026 | <span class="logo-mark">Accenture</span></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SLIDE 3: WHY NOW & POSITIONING ════════════════════ -->
+<section class="slide">
+  <div>
+    <div class="slide-header">
+      <div class="slide-tag">Market Positioning &amp; Paradigm Shift</div>
+      <div class="slide-title">Moving Beyond Static BI and Unfenced GenAI</div>
+      <div class="slide-subtitle">A architectural leap to governed, self-auditing intelligence-to-action engines</div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom: 14px;">
+      <!-- Comparative Table -->
+      <div class="card card-purple">
+        <div class="card-title">📊 Architectural Landscape Comparison</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Traditional BI (Tableau/PowerBI)</th>
+              <th>GenAI Text-to-SQL Wrappers</th>
+              <th style="color: #C084FC;">NovaMart Engine</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Number Generation</strong></td>
+              <td>SQL Aggregations</td>
+              <td>LLM Guesses / Generated SQL</td>
+              <td><span class="highlight-emerald">100% Deterministic Python</span></td>
+            </tr>
+            <tr>
+              <td><strong>Factor Attribution</strong></td>
+              <td>Manual Drilling</td>
+              <td>Prose Summaries</td>
+              <td><span class="highlight-purple">Exact Additive LMDI + OLS</span></td>
+            </tr>
+            <tr>
+              <td><strong>Uncertainty / Quality</strong></td>
+              <td>Ignored</td>
+              <td>Always Confident</td>
+              <td><span class="highlight-amber">5-Signal Weighted Confidence</span></td>
+            </tr>
+            <tr>
+              <td><strong>Bad / Stale Data</strong></td>
+              <td>Renders Blindly</td>
+              <td>Hallucinates Explanations</td>
+              <td><span class="highlight-emerald">Principled Abstention Protocol</span></td>
+            </tr>
+            <tr>
+              <td><strong>Security &amp; Governance</strong></td>
+              <td>Client-side Dashboard Hiding</td>
+              <td>Unfenced Prompting</td>
+              <td><span class="highlight-purple">Server-Side Payload Redaction</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- The 3 USPs -->
+      <div class="card card-cyan">
+        <div class="card-title">⚡ Three Core Unique Selling Points (USPs)</div>
+        
+        <div style="margin-bottom: 10px;">
+          <div style="font-weight: 700; color: #38BDF8; font-size: 9.5pt;">1. Deterministic Math &amp; Post-Hoc Number Validation</div>
+          <p style="font-size: 8.5pt;">Every dollar amount, percentage, and beta coefficient is computed in Python. If an LLM narrative contains any unverified number, it is automatically discarded for a safe template.</p>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <div style="font-weight: 700; color: #FBBF24; font-size: 9.5pt;">2. Honest Abstention Over Confident Guessing</div>
+          <p style="font-size: 8.5pt;">Three explicit automated triggers (sparse history &lt;30d, stale data &gt;26h with cross-source conflict, confidence &lt;60%) cause the engine to refuse recommendations and request clarification.</p>
+        </div>
+
+        <div>
+          <div style="font-weight: 700; color: #34D399; font-size: 9.5pt;">3. Immutable Evidence Lineage &amp; Server RBAC</div>
+          <p style="font-size: 8.5pt;">Every claim links to an explicit evidence object <code>[E101-E110]</code>. Metric redaction occurs at the API layer — restricted KPIs never leave the server.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="card card-amber" style="padding: 8px 12px;">
+      <div style="font-size: 8.5pt; color: #CBD5E1; display: flex; justify-content: space-between; align-items: center;">
+        <span><strong>Coverage Footprint:</strong> 5 Core KPIs (Revenue, Orders, AOV, Margin, Conversion) across 3 Data Sources at 3 Grains.</span>
+        <span class="badge badge-amber">Zero Token Cost for 90%+ Queries</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Slide 3 of 7</div>
+    <div>Accenture Innovation Challenge 2026 | <span class="logo-mark">Accenture</span></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SLIDE 4: SOLUTION ARCHITECTURE ════════════════════ -->
+<section class="slide">
+  <div>
+    <div class="slide-header">
+      <div class="slide-tag">Solution Architecture &amp; Governing Principles</div>
+      <div class="slide-title">The 4-Stage Intelligence-to-Action Pipeline</div>
+      <div class="slide-subtitle">How raw multi-source data is transformed into audited business recommendations</div>
+    </div>
+
+    <!-- 4 Pipeline Stages -->
+    <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
+      
+      <!-- Stage 1 -->
+      <div class="card card-purple" style="padding: 10px;">
+        <div class="badge badge-purple" style="margin-bottom: 4px;">STAGE 1</div>
+        <div style="font-weight: 700; color: #F8FAFC; font-size: 9.5pt; margin-bottom: 4px;">Reconciliation &amp; Semantic Layer</div>
+        <ul style="font-size: 8pt; padding-left: 12px;">
+          <li>Joins 3 sources (Transactions, Marketing, External context).</li>
+          <li>Centralized metric contracts (grain, formulas, thresholds, ownership).</li>
+        </ul>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="card card-emerald" style="padding: 10px;">
+        <div class="badge badge-emerald" style="margin-bottom: 4px;">STAGE 2</div>
+        <div style="font-weight: 700; color: #F8FAFC; font-size: 9.5pt; margin-bottom: 4px;">Deterministic Analytics Engine</div>
+        <ul style="font-size: 8pt; padding-left: 12px;">
+          <li>Z-score movement detection against 84-day rolling baseline.</li>
+          <li><strong>LMDI exact additive split</strong> (Volume vs Price/Mix).</li>
+          <li>OLS panel regression + IsolationForest anomalies.</li>
+        </ul>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="card card-amber" style="padding: 10px;">
+        <div class="badge badge-amber" style="margin-bottom: 4px;">STAGE 3</div>
+        <div style="font-weight: 700; color: #F8FAFC; font-size: 9.5pt; margin-bottom: 4px;">Evidence &amp; Confidence Engine</div>
+        <ul style="font-size: 8pt; padding-left: 12px;">
+          <li>Assembles immutable evidence objects <code>[E101-E110]</code>.</li>
+          <li>5-signal composite confidence score.</li>
+          <li><strong>3 Abstention Triggers</strong> (history, stale data, score &lt;60%).</li>
+        </ul>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="card card-cyan" style="padding: 10px;">
+        <div class="badge badge-cyan" style="margin-bottom: 4px;">STAGE 4</div>
+        <div style="font-weight: 700; color: #F8FAFC; font-size: 9.5pt; margin-bottom: 4px;">Validated Narrative &amp; Action</div>
+        <ul style="font-size: 8pt; padding-left: 12px;">
+          <li>Persona templates + optional LLM narrative.</li>
+          <li><strong>Post-hoc numeric whitelist &amp; anti-causal validation.</strong></li>
+          <li>Role-gated approval workflow &amp; feedback loop.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Architecture Diagram ASCII / Schematic Card -->
+    <div class="card card-purple">
+      <div class="card-title">⚙️ End-to-End System Data Flow</div>
+      <pre style="font-size: 7.8pt; line-height: 1.35; color: #38BDF8; background: #0F172A; padding: 8px 12px; border-radius: 4px;">
+Transactions (Order-level)  ─┐
+Marketing (Campaign-level)  ─┼─> Reconciliation -> Semantic Layer -> Movement Detection (Z-Score) & Data Quality Check
+External (Macro/Supply)     ─┘                                                    │
+                                                                                  ▼
+                                         OLS Regression + LMDI Decomposition + Business Rules -> Driver Attribution
+                                                                                  │
+                                                                                  ▼
+                                                            Evidence Layer -> Confidence Engine (5 Signals)
+                                                                              /                 \
+                                                                  High Confidence (&ge;60%)   Low Confidence (&lt;60%)
+                                                                        │                           │
+                                                            Persona Narrative (Validated)       ABSTAIN (State reason)
+                                                                        │                           │
+                                                               Action Recommendation                │
+                                                                        └──────── Feedback Loop ────┘</pre>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Slide 4 of 7</div>
+    <div>Accenture Innovation Challenge 2026 | <span class="logo-mark">Accenture</span></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SLIDE 5: PROOF OF ENGINE & VALIDATION ════════════════════ -->
+<section class="slide">
+  <div>
+    <div class="slide-header">
+      <div class="slide-tag">Empirical Proof &amp; Verification</div>
+      <div class="slide-title">Proof of Engine: Worked Example, Personas, Security &amp; Telemetry</div>
+      <div class="slide-subtitle">Live UI walkthrough, side-by-side persona rendering, 5-scenario benchmark, and production metrics</div>
+    </div>
+
+    <div class="grid-2-1" style="margin-bottom: 10px;">
+      
+      <!-- Left Column: UI Mockup & Persona Comparison -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        
+        <!-- Worked Example UI Box -->
+        <div class="card card-purple" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="font-weight: 700; color: #F8FAFC; font-size: 9.5pt;">🖥️ Worked Example: Revenue Decline (-14.4%)</div>
+            <div>
+              <span class="badge badge-emerald">CONFIDENCE 84% (HIGH)</span>
+              <span class="badge badge-purple">VALIDATED PASS</span>
+            </div>
+          </div>
+          <div style="background: #0F172A; border: 1px solid #1E293B; border-radius: 6px; padding: 8px; font-size: 8pt; color: #CBD5E1;">
+            <div style="color: #38BDF8; font-weight: 600; margin-bottom: 4px;">Executive Narrative Output:</div>
+            <p style="font-size: 8pt; color: #E2E8F0; margin-bottom: 6px;">
+              "Revenue dropped <strong>$3,105,035 (-14.4%)</strong> in the current window. LMDI factor decomposition shows an <strong>Orders Volume effect of -$2,410,200 (-11.2%)</strong> and an <strong>AOV effect of -$694,835 (-3.2%)</strong>. OLS regression identifies <strong>marketing spend pullback (30%)</strong> as the top driver with high statistical significance (p=0.001)."
+            </p>
+            <div style="display: flex; gap: 12px; font-size: 7.5pt; color: #94A3B8;">
+              <span>Evidence: <code style="color: #FBBF24;">[E101: Revenue Δ]</code> <code style="color: #FBBF24;">[E104: LMDI]</code> <code style="color: #FBBF24;">[E107: OLS]</code></span>
+              <span>Guardrails: <span style="color: #34D399;">✓ Whitelist Matched</span> <span style="color: #34D399;">✓ Associational Claim Verified</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side-by-Side Persona Comparison -->
+        <div class="grid-2">
+          <div class="card card-purple" style="padding: 8px 10px;">
+            <div class="badge badge-purple" style="margin-bottom: 4px;">EXECUTIVE / CFO VIEW</div>
+            <p style="font-size: 8pt; color: #F1F5F9; font-weight: 600;">Strategic &amp; High-Level Action</p>
+            <p style="font-size: 7.8pt; color: #94A3B8;">Headline: Revenue -14.4% ($3.1M drop). Recommendation: Re-allocate $150k campaign budget to high-performing digital channels. Approvable by: Executive.</p>
+          </div>
+          <div class="card card-emerald" style="padding: 8px 10px;">
+            <div class="badge badge-emerald" style="margin-bottom: 4px;">ANALYST / REGIONAL LEAD VIEW</div>
+            <p style="font-size: 8pt; color: #F1F5F9; font-weight: 600;">Full Statistical &amp; Evidence Detail</p>
+            <p style="font-size: 7.8pt; color: #94A3B8;">Detailed OLS Betas (&beta;<sub>mktg</sub>=0.48, p=0.001, t=4.12), Pearson r=0.72, Spearman &rho;=0.69, North regional stockout breakdown, full evidence links.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: 5 Scenarios Table (Including RBAC) & Telemetry -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        
+        <!-- Scenario Matrix -->
+        <div class="card card-amber" style="padding: 10px;">
+          <div class="card-title" style="font-size: 9.5pt;">🧪 5 Benchmark Scenarios Matrix</div>
+          <table style="font-size: 7.5pt;">
+            <thead>
+              <tr><th>Scenario</th><th>Underlying Pathology</th><th>Engine Behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Revenue Decline</strong></td><td>30% Ad Pullback + Stockout</td><td><span style="color: #34D399;">Attributes Mktg &amp; Supply</span></td></tr>
+              <tr><td><strong>Revenue Growth</strong></td><td>Campaign Expansion</td><td><span style="color: #34D399;">Attributes Lift (+21.4%)</span></td></tr>
+              <tr><td><strong>Contradictory</strong></td><td>Stale Mktg (29h) + Missing EX</td><td><span style="color: #FBBF24;">ABSTAINS (Conflicting)</span></td></tr>
+              <tr><td><strong>New Product</strong></td><td>18 days baseline history</td><td><span style="color: #FBBF24;">ABSTAINS (Sparse Hist)</span></td></tr>
+              <tr><td><strong style="color: #C084FC;">Role Security</strong></td><td>Regional query restricted KPI</td><td><span style="color: #FB7185;">REDACTED SERVER-SIDE</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Telemetry & Contract Box -->
+        <div class="card card-cyan" style="padding: 10px;">
+          <div class="card-title" style="font-size: 9.5pt;">⚡ Telemetry &amp; Semantic Contract</div>
+          <div style="font-size: 7.8pt; color: #CBD5E1; margin-bottom: 4px;">
+            <strong>Revenue Contract:</strong> Formula: <code>SUM(qty * unit_price)</code> | Grain: <code>order_product_day</code> | Refresh: <code>1h</code> | Threshold: <code>z&gt;1.5</code>
+          </div>
+          <div class="grid-2" style="margin-top: 6px; gap: 6px;">
+            <div class="stat-box" style="padding: 4px 6px;">
+              <div class="stat-val" style="font-size: 11pt; color: #34D399;">16.4 ms</div>
+              <div class="stat-lbl" style="font-size: 6.5pt;">P95 Latency</div>
+            </div>
+            <div class="stat-box" style="padding: 4px 6px;">
+              <div class="stat-val" style="font-size: 11pt; color: #38BDF8;">91.5%</div>
+              <div class="stat-lbl" style="font-size: 6.5pt;">LLM Avoided</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Bottom Line: Coverage Statement -->
+    <div class="card card-purple" style="padding: 6px 12px;">
+      <div style="font-size: 8.2pt; color: #E2E8F0; text-align: center;">
+        📌 <strong>Coverage Statement:</strong> 5 Core KPIs (Revenue, Orders, AOV, Gross Margin, Conversion Rate) across 3 Data Sources at 3 Distinct Grains (order-level, campaign-level, regional-macro).
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Slide 5 of 7</div>
+    <div>Accenture Innovation Challenge 2026 | <span class="logo-mark">Accenture</span></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SLIDE 6: COVERAGE SCORECARD (NEW SLIDE) ════════════════════ -->
+<section class="slide">
+  <div>
+    <div class="slide-header">
+      <div class="slide-tag">Compliance &amp; Checklist Verification</div>
+      <div class="slide-title">Minimum Prototype Expectations Coverage Scorecard</div>
+      <div class="slide-subtitle">Direct mapping against Accenture Problem Track 3 mandatory submission brief requirements</div>
+    </div>
+
+    <div class="card card-purple" style="padding: 10px;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 32%;">Brief Checklist Expectation Requirement</th>
+            <th style="width: 8%; text-align: center;">Status</th>
+            <th style="width: 60%;">Implementation Proof &amp; Exact Location Pointer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Multi-Source Data Reconciliation</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>Reconciles Transactions, Marketing, and External context across 3 distinct grains (<code>backend/app/main.py</code>, <code>analytics.py</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>2. Dynamic KPI Movement Detection</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>Calculates Z-scores against rolling 84-day baselines; flags movements exceeding 1.5&sigma; (<code>analytics.py:detect_movements</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>3. Factor Decomposition (Volume vs Price)</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>Exact additive <strong>LMDI decomposition</strong> (Orders effect + AOV effect = Total Revenue Delta with zero residual) (<code>analytics.py:lmdi_revenue</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>4. Statistical Driver Attribution</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>Multivariate OLS panel regression returning dollar-denominated betas, R&sup2;, p-values, and Pearson/Spearman checks (<code>analytics.py:driver_attribution</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>5. Data Quality &amp; Confidence Scoring</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>5-signal weighted composite (Completeness 25%, Freshness 20%, Statistical 20%, Agreement 20%, History 15%) (<code>analytics.py:confidence</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>6. Selective Abstention Protocol</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>3 automated triggers: history &lt;30d, cross-source conflict + stale data, confidence &lt;60%. Refuses recommendation and asks clarifying queries (<code>insight.py</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>7. Persona Narratives &amp; Validation</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>Persona-tailored output validated via post-hoc <strong>Numeric Whitelist Matching</strong> and <strong>Anti-Causal Regex Guards</strong> (<code>narrative.py</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>8. Server-Side RBAC &amp; Role Action Gating</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>Metric payload redaction at API layer + role-gated action approvals (Executive, Marketing, Operations, Analyst) (<code>auth.py</code>, <code>rules.py</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>9. Benchmark Testbed Scenarios</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>4 seeded benchmark scenarios with known ground truth + Mulberry32 deterministic PRNG (<code>generator.py</code>, <code>test_engine.py</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>10. Interactive Simulation &amp; Feedback</strong></td>
+            <td style="text-align: center; color: #34D399; font-weight: bold;">✅ Pass</td>
+            <td>Day-by-day forward what-if shock simulator + analyst feedback loop tuning materiality thresholds (<code>SimulatorPage.tsx</code>, <code>FeedbackPage.tsx</code>)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="slide-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Slide 6 of 7</div>
+    <div>Accenture Innovation Challenge 2026 | <span class="logo-mark">Accenture</span></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SLIDE 7: IMPLEMENTATION & DEPLOYMENT ════════════════════ -->
+<section class="slide">
+  <div>
+    <div class="slide-header">
+      <div class="slide-tag">Implementation &amp; Delivery Readiness</div>
+      <div class="slide-title">Production Tech Stack, Testing &amp; Live Deployment</div>
+      <div class="slide-subtitle">Enterprise-ready architecture with automated regression suites and serverless deployment</div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom: 14px;">
+      
+      <!-- Tech Stack -->
+      <div class="card card-purple">
+        <div class="card-title">🛠️ Core Technology Stack</div>
+        <ul style="font-size: 8.5pt;">
+          <li><strong>API / Engine:</strong> FastAPI (Python 3.11), pandas, statsmodels, scipy, scikit-learn.</li>
+          <li><strong>Frontend:</strong> React 18, TypeScript, TailwindCSS, Recharts, Lucide.</li>
+          <li><strong>Database:</strong> PostgreSQL (SQLAlchemy) with SQLite zero-infra fallback.</li>
+          <li><strong>Cache &amp; Routing:</strong> Redis with in-memory TTL fallback; 3-tier cost router.</li>
+        </ul>
+      </div>
+
+      <!-- Testing & Ground Truth -->
+      <div class="card card-emerald">
+        <div class="card-title">🧪 Automated Test Suite (39 Tests)</div>
+        <ul style="font-size: 8.5pt;">
+          <li><strong>19 Engine Tests:</strong> Verify exact recovery of injected ground-truth drivers across scenarios.</li>
+          <li><strong>LMDI Reconciled:</strong> Asserts volume + price effects sum to total revenue within $1.</li>
+          <li><strong>Abstention Verified:</strong> Confirms engine abstains on stale data and sparse history.</li>
+          <li><strong>20 API / RBAC Tests:</strong> Validates JWT claims, server redaction, and endpoints.</li>
+        </ul>
+      </div>
+
+      <!-- Live Deployment -->
+      <div class="card card-cyan">
+        <div class="card-title">🌐 Production Deployment</div>
+        <ul style="font-size: 8.5pt;">
+          <li><strong>Live URL:</strong> <code style="color: #38BDF8;">https://kpi-engine.vercel.app</code></li>
+          <li><strong>Health Check:</strong> <code>GET /api/health</code> (HTTP 200 OK).</li>
+          <li><strong>Interactive Specs:</strong> FastAPI auto-generated OpenAPI docs at <code>/docs</code>.</li>
+          <li><strong>Containerized:</strong> <code>docker compose up --build</code> (Postgres + Redis included).</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Final Summary Banner -->
+    <div class="card card-purple" style="text-align: center; padding: 14px; background: linear-gradient(135deg, #121824 0%, #1E1B4B 100%); border: 1px solid #6366F1;">
+      <div style="font-size: 14pt; font-weight: 800; color: #FFF; margin-bottom: 4px;">
+        Submission Ready &bull; Fully Tested &bull; Live &amp; Verified
+      </div>
+      <p style="font-size: 9.5pt; color: #CBD5E1;">
+        The NovaMart KPI Engine solves the core enterprise challenge: bringing mathematical certainty, automated driver attribution, and principled abstention to AI-assisted decision making.
+      </p>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Slide 7 of 7</div>
+    <div>Accenture Innovation Challenge 2026 | <span class="logo-mark">Accenture</span></div>
+  </div>
+</section>
+
+</body>
+</html>
+`;
+
+fs.writeFileSync(htmlPath, htmlContent, 'utf-8');
+console.log('pitch_deck.html created successfully.');
+
+(async () => {
+  const browser = await puppeteer.launch({ headless: 'new' });
+  const page = await browser.newPage();
+  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+  await page.pdf({
+    path: pdfPath,
+    format: 'A4',
+    landscape: true,
+    printBackground: true,
+    margin: { top: 0, right: 0, bottom: 0, left: 0 }
+  });
+  await browser.close();
+  console.log('PDF saved successfully to:', pdfPath);
+})();

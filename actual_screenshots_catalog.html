@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NovaMart KPI Engine — Actual Vercel UI Screenshots</title>
+<style>
+  @page {
+    size: 297mm 210mm; /* A4 Landscape */
+    margin: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background: #0B0F17;
+    color: #F1F5F9;
+    -webkit-print-color-adjust: exact;
+  }
+  .page {
+    width: 297mm;
+    height: 210mm;
+    padding: 12mm 16mm;
+    position: relative;
+    page-break-after: always;
+    background: #0B0F17;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Header structure */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1E293B;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .page-title {
+    font-size: 14pt;
+    font-weight: 800;
+    color: #F8FAFC;
+    letter-spacing: -0.3px;
+  }
+  .page-subtitle {
+    font-size: 8pt;
+    color: #94A3B8;
+  }
+  .badge-tag {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34D399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* Footer bar */
+  .page-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #1E293B;
+    padding-top: 5px;
+    font-size: 7pt;
+    color: #64748B;
+    font-family: monospace;
+  }
+
+  /* Image Containers */
+  .img-frame {
+    width: 100%;
+    height: 124mm;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  }
+
+  /* Grid & Cards */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .card {
+    background: #121824;
+    border: 1px solid #1E293B;
+    border-radius: 6px;
+    padding: 6px 10px;
+    border-left: 3px solid #A100FF;
+  }
+  .card-title {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #F1F5F9;
+    margin-bottom: 3px;
+  }
+  ul { padding-left: 12px; }
+  li {
+    font-size: 7.5pt;
+    color: #CBD5E1;
+    line-height: 1.35;
+    margin-bottom: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ COVER PAGE ════════════════════ -->
+<div class="page" style="justify-content: space-between;">
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+      <div>
+        <span class="badge-tag" style="font-size: 9pt; padding: 4px 10px;">LIVE VERCEL PRODUCTION SCREENSHOTS</span>
+        <h1 style="font-size: 30pt; font-weight: 900; color: #FFF; margin-top: 8px; letter-spacing: -0.8px;">
+          NovaMart Intelligence Platform
+        </h1>
+        <p style="font-size: 13pt; color: #94A3B8; margin-top: 4px;">
+          Actual Application UI Frame Screenshots Captured Live from Production
+        </p>
+      </div>
+      <div style="text-align: right; font-family: monospace; font-size: 9pt; color: #64748B;">
+        <div style="color: #34D399; font-weight: bold; font-size: 10pt;">https://kpi-engine.vercel.app</div>
+        <div>Accenture Hackathon Round 2</div>
+        <div>Problem Track 3</div>
+      </div>
+    </div>
+
+    <!-- Summary Box -->
+    <div style="background: #121824; border: 1px solid #1E293B; border-left: 4px solid #10B981; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+      <div style="font-size: 11pt; font-weight: 700; color: #F1F5F9; margin-bottom: 6px;">
+        📸 Verified Production Interface Screenshots (10 Frames)
+      </div>
+      <p style="font-size: 9pt; color: #CBD5E1; line-height: 1.5;">
+        This document contains unedited 1440x900 screenshots captured directly from the live Vercel production deployment at <code>https://kpi-engine.vercel.app</code> using automated Puppeteer headless navigation. It documents all 9 main application screens plus the slide-in Analyst Chat drawer, confirming live functionality across movement detection, LMDI factor splits, abstention protocols, live time simulation, RBAC redactions, and telemetry monitoring.
+      </p>
+    </div>
+
+    <!-- 10 Frames Table Index -->
+    <div style="background: #121824; border: 1px solid #1E293B; border-radius: 8px; padding: 12px 14px;">
+      <div style="font-size: 9.5pt; font-weight: 700; color: #F1F5F9; margin-bottom: 8px;">
+        📋 Table of Live UI Frames Included:
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 8pt; color: #CBD5E1;">
+        <div>1. <strong>Overview Dashboard</strong> — KPI Cards, LMDI Bar Chart, Confidence Gauge</div>
+        <div>6. <strong>Data Sources &amp; Ingestion</strong> — SLA Freshness, Row Counts, JSON Editor</div>
+        <div>2. <strong>Insight Analysis</strong> — Persona Narrative, What-If Sandbox Sliders, Lineage</div>
+        <div>7. <strong>Semantic Layer</strong> — KPI Contracts, Formulas, Owners, Materiality</div>
+        <div>3. <strong>Abstention Protocol</strong> — Low Confidence Alert, Failure Logs, Clarification Chips</div>
+        <div>8. <strong>Feedback Loop</strong> — Analyst Helpfulness Rating, Error Categorization</div>
+        <div>4. <strong>Driver Attribution</strong> — OLS Panel Regression Table, Pearson/Spearman Matrix</div>
+        <div>9. <strong>System Health</strong> — Latency Bar Chart, P95 Telemetry, Cost Routing</div>
+        <div>5. <strong>Live Simulator Lab</strong> — Parameter Shocks, Sprint Trigger, SQLite Counters</div>
+        <div>10. <strong>Analyst Chat Drawer</strong> — Natural Language Queries, Intent Metadata Badges</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Production Screenshots</div>
+    <div>Cover Page</div>
+  </div>
+</div>
+
+<!-- ════════════════════ 10 SCREENSHOT PAGES ════════════════════ -->
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">1. Overview Dashboard (Happy Path)</div>
+        <div class="page-subtitle">Revenue Decline Scenario — Prioritized KPI Cards, Materiality Scores & 5-Signal Confidence Gauge</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Overview)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/01_overview.png" class="img-frame" alt="1. Overview Dashboard (Happy Path)" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Top bar shows active Scenario dropdown (Revenue Decline) and Role selector (Executive).</li>
+          <li>KPI Cards: Revenue ($18.4M, -14.4%, HIGH Priority), Orders, AOV, Gross Margin, Conversion Rate.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Primary Insight Card displaying computed business impact and Top Drivers attribution bar chart.</li>
+          <li>Materiality Ledger ranking movements and 5-Factor Weighted Confidence Meter at 84% (HIGH).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 1 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">2. Insight Analysis & What-If Sandbox</div>
+        <div class="page-subtitle">Validated Persona Narrative, LMDI Decomposition, Decision Sandbox & Traceable Lineage Ledger</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Insight Tab)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/02_insight.png" class="img-frame" alt="2. Insight Analysis & What-If Sandbox" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Headline and Persona narrative with green "Output validated" pass badge and anti-causal guardrails.</li>
+          <li>LMDI Factor Breakdown: Orders Volume Effect (-$2.4M) vs AOV Price/Mix Effect (-$694K).</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Interactive "What-If" Decision Sandbox sliders for real-time projected dollar recovery.</li>
+          <li>Traceable Evidence Ledger mapping claims to evidence IDs [E101-E110] with full lineage.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 2 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">3. Selective Abstention Protocol (Contradictory Scenario)</div>
+        <div class="page-subtitle">Honest AI Refusal — Machine-Enforced Pause on Stale Data & Low Confidence</div>
+      </div>
+      <span class="badge-tag">SCENARIO: Contradictory Evidence</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/03_abstention.png" class="img-frame" alt="3. Selective Abstention Protocol (Contradictory Scenario)" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Amber warning panel replaces standard recommendations when data quality is insufficient.</li>
+          <li>Explicit failure diagnostic reasons: Marketing data 29 hours stale, 18% missing external rows.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Prevents hallucinated advice when cross-source agreement drops below 50%.</li>
+          <li>Interactive clarification prompt chips allowing analysts to query failure details directly.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 3 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">4. Driver Attribution & Statistical Diagnostics</div>
+        <div class="page-subtitle">Multivariate OLS Panel Regression, Correlation Matrix & Anomaly Detection</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Drivers Tab)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/04_drivers.png" class="img-frame" alt="4. Driver Attribution & Statistical Diagnostics" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Methodology banner: "Regression is associational, not causal proof."</li>
+          <li>OLS Regression table displaying standardized beta strength bars, R² fit, and p-value significance.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Comparative Pearson r vs Spearman rank ρ correlation matrix for monotonicity checking.</li>
+          <li>Auditable Business Rules triggers (SUPPLY_CONSTRAINT) and IsolationForest anomaly badges.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 4 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">5. Live Time-Machine Scenario Simulator Lab</div>
+        <div class="page-subtitle">Parameter Shocks, Sprint Progression & Live SQLite Record Counters</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Simulator Tab)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/05_simulator.png" class="img-frame" alt="5. Live Time-Machine Scenario Simulator Lab" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Interactive parameter shock sliders: Marketing Spend (0.1x to 3.0x), Stockouts (0-50%), Price Index.</li>
+          <li>Sprint Duration selector: Advance scenario timeline by 1, 7, or 14 days.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Live SQLite record counters tracking active transaction, marketing, and external row additions.</li>
+          <li>One-click Scenario Reset button to restore pristine 365-day seeded benchmark.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 5 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">6. Data Sources & Ingestion Portal</div>
+        <div class="page-subtitle">Pipeline SLA Freshness Audit, Schema Definitions & Custom JSON Ingestion</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Sources Tab)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/06_sources.png" class="img-frame" alt="6. Data Sources & Ingestion Portal" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Data freshness matrix auditing latency against expected SLAs for transactions, marketing, external feeds.</li>
+          <li>Accordion inspection view showing grain, total rows, expected rows, and missing percentage.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>One-Click "Seed All 4 Scenarios to Database" button powering instant PRNG re-seeding.</li>
+          <li>Custom Data Ingestion Portal (POST /api/ingest) with JSON text area editor.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 6 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">7. Semantic Layer & Metric Contracts</div>
+        <div class="page-subtitle">Central KPI Governance — Definitions, Formulas, Owners, Grains & Access</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Semantic Tab)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/07_semantic.png" class="img-frame" alt="7. Semantic Layer & Metric Contracts" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Centralized contract definitions for Revenue, Orders, AOV, Gross Margin, CAC, Stockout Rate.</li>
+          <li>Formal mathematical formulas (e.g. SUM(unit_price * quantity), revenue / orders).</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Business metric owners (VP Sales, Head of Growth, Supply Chain Lead).</li>
+          <li>Associated statistical drivers, refresh cadences, materiality thresholds, and role access.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 7 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">8. Feedback Loop & Analyst Telemetry</div>
+        <div class="page-subtitle">Human-in-the-Loop Analyst Ratings, Closed-Loop Weight Tuning & Feedback Audit</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Feedback Tab)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/08_feedback.png" class="img-frame" alt="8. Feedback Loop & Analyst Telemetry" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Analyst rating card: Helpful vs Not Helpful, category tagging, driver correction input.</li>
+          <li>Feedback telemetry cards: Total insights reviewed, helpfulness percentage, error categories.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Explains closed-loop tuning: Analyst corrections dynamically penalize disproven driver weights.</li>
+          <li>Audit log storing analyst corrections directly in PostgreSQL / SQLite.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 8 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">9. System Health & Telemetry Dashboard</div>
+        <div class="page-subtitle">Latency Bar Chart per Request, P95 Metric, Cache Hit Rate & Cost Routing</div>
+      </div>
+      <span class="badge-tag">ROUTE: / (Health Tab)</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/09_health.png" class="img-frame" alt="9. System Health & Telemetry Dashboard" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Telemetry metrics: Last latency (ms), P95 latency (ms), LLM calls avoided %, Cache hit rate %.</li>
+          <li>Interactive Recharts bar chart tracking request latency across recent engine queries.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Cost-Optimized Model Routing breakdown: Tier 1 (Deterministic), Tier 2 (Fast), Tier 3 (Complex).</li>
+          <li>Confirms 90%+ of quantitative queries skip LLM API token costs entirely.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 9 of 10</div>
+  </div>
+</div>
+
+<div class="page">
+  <div>
+    <div class="page-header">
+      <div>
+        <div class="page-title">10. Analyst Natural Language Chat Drawer</div>
+        <div class="page-subtitle">Natural Language Querying, Intent Classification & Cost-Tier Routing Badges</div>
+      </div>
+      <span class="badge-tag">COMPONENT: Analyst Chat Drawer</span>
+    </div>
+
+    <img src="file:///C:/Users/Vansh/Documents/accenture/kpi-engine/live_screenshots/10_chat_drawer.png" class="img-frame" alt="10. Analyst Natural Language Chat Drawer" />
+
+    <div class="features-grid">
+      <div class="card" style="border-left: 3px solid #A100FF;">
+        <div class="card-title">🔍 Live UI Components &amp; State</div>
+        <ul>
+          <li>Slide-in right drawer for conversational analytics in natural language.</li>
+          <li>Assistant response pills displaying intent (why_down), filter tags (region=North), and execution latency.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid #10B981;">
+        <div class="card-title">⚡ Feature Functionality &amp; Engine Mechanics</div>
+        <ul>
+          <li>Route indicator badge distinguishing narrative vs zero-token deterministic queries.</li>
+          <li>Quick suggestion prompt chips for instant click-to-query execution.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div>NovaMart Intelligence-to-Action Engine | Live Vercel Screenshots (https://kpi-engine.vercel.app)</div>
+    <div>Page 10 of 10</div>
+  </div>
+</div>
+
+
+</body>
+</html>
